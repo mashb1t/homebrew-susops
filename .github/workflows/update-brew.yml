@@ -13,6 +13,10 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      brew_tap_token:
+        description: 'PAT with permissions to push to homebrew-susops'
+        required: true
 
 jobs:
   update:
@@ -25,7 +29,7 @@ jobs:
           repository: mashb1t/homebrew-susops
           path: homebrew-susops
           persist-credentials: true
-          token: ${{ secrets.BREW_TAP_TOKEN }}
+          token: ${{ secrets.brew_tap_token }}
 
       # CLI update steps
       - name: Fetch latest CLI release
@@ -85,4 +89,3 @@ jobs:
           add: |
             Formula/susops.rb
             Casks/susops.rb
-          token: ${{ secrets.BREW_TAP_TOKEN }}
