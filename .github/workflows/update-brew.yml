@@ -1,0 +1,81 @@
+name: Update Homebrew Formula & Cask
+
+on:
+  workflow_call:
+    inputs:
+      update_cli:
+        description: 'Whether to update the CLI formula'
+        required: false
+        type: boolean
+        default: true
+      update_mac:
+        description: 'Whether to update the macOS app cask'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out tap repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      # CLI update steps
+      - name: Fetch latest CLI release
+        if: ${{ inputs.update_cli }}
+        id: cli
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: "mashb1t/susops-cli"
+
+      - name: Compute CLI SHA and normalize version
+        if: ${{ inputs.update_cli }}
+        run: |
+          RAW_CLI_VER=${{ steps.cli.outputs.release }}
+          CLI_VER=${RAW_CLI_VER#v}
+          CLI_SHA=$(curl -L https://github.com/mashb1t/susops-cli/archive/refs/tags/${RAW_CLI_VER}.tar.gz | shasum -a 256 | awk '{print $1}')
+          echo "CLI_SHA=$CLI_SHA" >> $GITHUB_OUTPUT
+          echo "CLI_VER=$CLI_VER" >> $GITHUB_OUTPUT
+
+      # macOS App update steps
+      - name: Fetch latest macOS App release
+        if: ${{ inputs.update_mac }}
+        id: mac
+        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        with:
+          repository: "mashb1t/susops-mac"
+
+      - name: Compute Cask SHA and normalize version
+        if: ${{ inputs.update_mac }}
+        run: |
+          RAW_MAC_VER=${{ steps.mac.outputs.release }}
+          MAC_VER=${RAW_MAC_VER#v}
+          MAC_SHA=$(curl -L https://github.com/mashb1t/susops-mac/releases/download/v${MAC_VER}/SusOps.zip | shasum -a 256 | awk '{print $1}')
+          echo "MAC_SHA=$MAC_SHA" >> $GITHUB_OUTPUT
+          echo "MAC_VER=$MAC_VER" >> $GITHUB_OUTPUT
+
+      - name: Update Formula/susops.rb
+        if: ${{ inputs.update_cli }}
+        run: |
+          sed -i "s|sha256 \".*\"|sha256 \"${{ steps.cli.outputs.CLI_SHA }}\"|" Formula/susops.rb
+          sed -i "s|version \".*\"|version \"${{ steps.cli.outputs.CLI_VER }}\"|" Formula/susops.rb
+
+      - name: Update Casks/susops.rb
+        if: ${{ inputs.update_mac }}
+        run: |
+          sed -i "s|sha256 \".*\"|sha256 \"${{ steps.mac.outputs.MAC_SHA }}\"|" Casks/susops.rb
+          sed -i "s|version \".*\"|version \"${{ steps.mac.outputs.MAC_VER }}\"|" Casks/susops.rb
+
+      - name: Commit bump
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions
+          author_email: actions@github.com
+          message: "ci: bump SusOps${{ inputs.update_cli && inputs.update_mac && ' formula & cask' || inputs.update_cli && ' formula' || inputs.update_mac && ' cask' }} to ${{ inputs.update_cli && steps.cli.outputs.CLI_VER || '' }}${{ inputs.update_cli && inputs.update_mac && '/' || '' }}${{ inputs.update_mac && steps.mac.outputs.MAC_VER || '' }}"
+          add: |
+            Formula/susops.rb
+            Casks/susops.rb
