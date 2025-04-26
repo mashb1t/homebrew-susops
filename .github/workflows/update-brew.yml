@@ -81,8 +81,6 @@ jobs:
 
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
-        env:
-          GITHUB_TOKEN: ${{ secrets.brew_tap_token }}
         with:
           cwd: homebrew-susops
           author_name: github-actions
