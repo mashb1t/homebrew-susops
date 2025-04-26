@@ -1,9 +1,9 @@
 class Susops < Formula
   desc "Lightweight CLI for website proxying and port forwarding"
   homepage "https://github.com/mashb1t/susops-cli"
-  version "1.0.0"
-  url "https://github.com/mashb1t/susops-cli/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "399420ff3221f65553147739fec588f49831992bb2b455cd4ecaf0bc8d8873e3"
+  version "1.0.1"
+  url "https://github.com/mashb1t/susops-cli/archive/refs/tags/v1.0.1.tar.gz"
+  sha256 "05e0af867972e3a9bb6a177cced6fde3e22f664191b43e96180718eea5671896"
 
   def install
     bin.install "susops.sh" => "susops"
