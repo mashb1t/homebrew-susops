@@ -19,26 +19,8 @@ on:
         required: true
 
 jobs:
-  release-version-check:
-    runs-on: ubuntu-latest
-    outputs:
-      is_prerelease: ${{ steps.check.outputs.is_prerelease }}
-    steps:
-      - name: Check for release tag
-        id: check
-        shell: bash
-        run: |
-          TAG="$GITHUB_REF_NAME"
-          # Match only X.Y.Z (no prerelease or build metadata)
-          if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          fi
-
   update:
-    needs: release-version-check
-    if: ${{ needs.release-version-check.outputs.is_prerelease == 'false' && (inputs.update_mac || inputs.update_cli) }}
+    if: ${{ inputs.update_mac || inputs.update_cli }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out tap repo
@@ -56,6 +38,7 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: "mashb1t/susops-cli"
+          excludes: prerelease, draft
 
       - name: Compute CLI SHA & version
         if: ${{ inputs.update_cli }}
@@ -74,6 +57,7 @@ jobs:
         uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: "mashb1t/susops-mac"
+          excludes: prerelease, draft
 
       - name: Compute Cask SHA & version
         if: ${{ inputs.update_mac }}
@@ -107,14 +91,7 @@ jobs:
           cwd: homebrew-susops
           author_name: github-actions
           author_email: actions@github.com
-          message: >-
-            ci: bump
-            ${{ inputs.update_cli && inputs.update_mac && 'formula & cask'
-              || inputs.update_cli && 'formula'
-              || inputs.update_mac && 'cask' }}
-            to ${{ inputs.update_cli && steps.cli_sha.outputs.CLI_VER || '' }}
-            ${{ inputs.update_cli && inputs.update_mac && '/' || '' }}
-            ${{ inputs.update_mac && steps.mac_sha.outputs.MAC_VER || '' }}
+          message: "ci: bump SusOps${{ inputs.update_cli && inputs.update_mac && ' formula & cask' || inputs.update_cli && ' formula' || inputs.update_mac && ' cask' }} to ${{ inputs.update_cli && steps.cli_sha.outputs.CLI_VER || '' }}${{ inputs.update_cli && inputs.update_mac && '/' || '' }}${{ inputs.update_mac && steps.mac_sha.outputs.MAC_VER || '' }}"
           add: |
             Formula/susops.rb
             Casks/susops.rb
