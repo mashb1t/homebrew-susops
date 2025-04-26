@@ -1,7 +1,5 @@
 # Homebrew SusOps Tap
 
-[![Build Status](https://github.com/mashb1t/homebrew-susops/actions/workflows/ci.yml/badge.svg)](https://github.com/mashb1t/homebrew-susops/actions)
-
 This is the Homebrew tap for SusOps, providing an easy way to install the SusOps CLI on macOS:
 
 - **[SusOps CLI](https://github.com/mashb1t/susops-cli)**: Lightweight command-line interface for website proxying and port forwarding.
