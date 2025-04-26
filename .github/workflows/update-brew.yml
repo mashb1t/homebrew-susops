@@ -22,7 +22,10 @@ jobs:
       - name: Check out tap repo
         uses: actions/checkout@v4
         with:
+          repository: mashb1t/homebrew-susops
+          path: homebrew-susops
           persist-credentials: true
+#          token: ${{ secrets.BREW_TAP_TOKEN }}
 
       # CLI update steps
       - name: Fetch latest CLI release
@@ -45,7 +48,7 @@ jobs:
       - name: Fetch latest macOS App release
         if: ${{ inputs.update_mac }}
         id: mac
-        uses: pozetroninc/github-action-get-latest-release@v0.5.0
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
         with:
           repository: "mashb1t/susops-mac"
 
@@ -60,12 +63,14 @@ jobs:
 
       - name: Update Formula/susops.rb
         if: ${{ inputs.update_cli }}
+        working-directory: homebrew-susops
         run: |
           sed -i "s|sha256 \".*\"|sha256 \"${{ steps.cli.outputs.CLI_SHA }}\"|" Formula/susops.rb
           sed -i "s|version \".*\"|version \"${{ steps.cli.outputs.CLI_VER }}\"|" Formula/susops.rb
 
       - name: Update Casks/susops.rb
         if: ${{ inputs.update_mac }}
+        working-directory: homebrew-susops
         run: |
           sed -i "s|sha256 \".*\"|sha256 \"${{ steps.mac.outputs.MAC_SHA }}\"|" Casks/susops.rb
           sed -i "s|version \".*\"|version \"${{ steps.mac.outputs.MAC_VER }}\"|" Casks/susops.rb
@@ -73,9 +78,11 @@ jobs:
       - name: Commit bump
         uses: EndBug/add-and-commit@v9
         with:
+          cwd: homebrew-susops
           author_name: github-actions
           author_email: actions@github.com
           message: "ci: bump SusOps${{ inputs.update_cli && inputs.update_mac && ' formula & cask' || inputs.update_cli && ' formula' || inputs.update_mac && ' cask' }} to ${{ inputs.update_cli && steps.cli.outputs.CLI_VER || '' }}${{ inputs.update_cli && inputs.update_mac && '/' || '' }}${{ inputs.update_mac && steps.mac.outputs.MAC_VER || '' }}"
           add: |
             Formula/susops.rb
             Casks/susops.rb
+#          token: ${{ secrets.BREW_TAP_TOKEN }}
