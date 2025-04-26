@@ -21,16 +21,39 @@ on:
 jobs:
   release-version-check:
     runs-on: ubuntu-latest
+    if: ${{ inputs.update_mac || inputs.update_cli }}
     outputs:
+      RAW_CLI_VER: ${{ steps.cli.outputs.release }}
+      RAW_MAC_VER: ${{ steps.mac.outputs.release }}
       is_prerelease: ${{ steps.check.outputs.is_prerelease }}
     steps:
+      # CLI update steps
+      - name: Fetch latest CLI release
+        if: ${{ inputs.update_cli }}
+        id: cli
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: "mashb1t/susops-cli"
+
+      # macOS App update steps
+      - name: Fetch latest macOS App release
+        if: ${{ inputs.update_mac }}
+        id: mac
+        uses: pozetroninc/github-action-get-latest-release@v0.8.0
+        with:
+          repository: "mashb1t/susops-mac"
+
       - name: Check for release tag
         id: check
         shell: bash
+        env:
+          TAG_CLI: ${{ steps.cli.outputs.release }}
+          TAG_MAC: ${{ steps.mac.outputs.release }}
         run: |
-          TAG="$GITHUB_REF_NAME"
+          echo "Checking TAG_CLI: $TAG_CLI"
+          echo "Checking TAG_MAC: $TAG_MAC"
           # Match only X.Y.Z (no prerelease or build metadata)
-          if [[ "$TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$TAG_CLI" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ || "$TAG_MAC" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
           else
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
@@ -38,7 +61,7 @@ jobs:
 
   update:
     needs: release-version-check
-    if: ${{ needs.release-version-check.outputs.is_prerelease == 'false' && (inputs.update_mac || inputs.update_cli) }}
+    if: ${{ needs.release-version-check.outputs.is_prerelease == 'false' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out tap repo
@@ -49,37 +72,21 @@ jobs:
           path: homebrew-susops
           persist-credentials: true
 
-      # CLI update steps
-      - name: Fetch latest CLI release
-        if: ${{ inputs.update_cli }}
-        id: cli
-        uses: pozetroninc/github-action-get-latest-release@v0.8.0
-        with:
-          repository: "mashb1t/susops-cli"
-
       - name: Compute CLI SHA & version
         if: ${{ inputs.update_cli }}
         id: cli_sha
         run: |
-          RAW_CLI_VER=${{ steps.cli.outputs.release }}
+          RAW_CLI_VER=${{ needs.release-version-check.outputs.outputs.release }}
           CLI_VER=${RAW_CLI_VER#v}
           CLI_SHA=$(curl -L https://github.com/mashb1t/susops-cli/archive/refs/tags/${RAW_CLI_VER}.tar.gz | shasum -a 256 | awk '{print $1}')
           echo "CLI_SHA=$CLI_SHA" >> $GITHUB_OUTPUT
           echo "CLI_VER=$CLI_VER" >> $GITHUB_OUTPUT
 
-      # macOS App update steps
-      - name: Fetch latest macOS App release
-        if: ${{ inputs.update_mac }}
-        id: mac
-        uses: pozetroninc/github-action-get-latest-release@v0.8.0
-        with:
-          repository: "mashb1t/susops-mac"
-
       - name: Compute Cask SHA & version
         if: ${{ inputs.update_mac }}
         id: mac_sha
         run: |
-          RAW_MAC_VER=${{ steps.mac.outputs.release }}
+          RAW_MAC_VER=${{ needs.release-version-check.outputs.release }}
           MAC_VER=${RAW_MAC_VER#v}
           MAC_SHA=$(curl -L https://github.com/mashb1t/susops-mac/releases/download/v${MAC_VER}/SusOps.zip | shasum -a 256 | awk '{print $1}')
           echo "MAC_SHA=$MAC_SHA" >> $GITHUB_OUTPUT
