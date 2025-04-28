@@ -41,9 +41,9 @@ class Susops < Formula
 
     # ls on empty configuration
     out = shell_output("#{bin}/susops ls")
-    assert_match "PAC hosts:\n→ None", out
-    assert_match "Local forwards:\n→ None", out
-    assert_match "Remote forwards:\n→ None", out
+    assert_match "PAC hosts:\n- None", out
+    assert_match "Local forwards:\n- None", out
+    assert_match "Remote forwards:\n- None", out
 
     # test when nothing is running
     out = shell_output("#{bin}/susops test --all", 1)
@@ -60,18 +60,18 @@ class Susops < Formula
     assert_match "Usage: susops rm -r", shell_output("#{bin}/susops rm -r", 1)
 
     # add -l (local-forward) and duplicate-rule errors
-    assert_match "Registered local forward", shell_output("#{bin}/susops add -l 9000 8000")
-    dup = shell_output("#{bin}/susops add -l 9000 8000", 1)
+    assert_match "Registered local forward", shell_output("#{bin}/susops add -l 8000 9000")
+    dup = shell_output("#{bin}/susops add -l 8000 9000", 1)
     assert_match(/Local forward .*already registered/, dup)
-    conflict = shell_output("#{bin}/susops add -l 9001 8000", 1)
+    conflict = shell_output("#{bin}/susops add -l 8000 9001", 1)
     assert_match(/Local port 8000 is already the source of a local forward/, conflict)
 
     # add -r (remote-forward) and conflicting-port errors
-    assert_match "Registered remote forward", shell_output("#{bin}/susops add -r 7000 6500")
-    dup_r = shell_output("#{bin}/susops add -r 7000 6500", 1)
+    assert_match "Registered remote forward", shell_output("#{bin}/susops add -r 6500 7000")
+    dup_r = shell_output("#{bin}/susops add -r 6500 7000", 1)
     assert_match(/already registered/, dup_r)
-    shell_output("#{bin}/susops add -l 6501 7001")
-    conflict_r = shell_output("#{bin}/susops add -r 7001 6501", 1)
+    shell_output("#{bin}/susops add -l 7001 6501")
+    conflict_r = shell_output("#{bin}/susops add -r 6501 7001", 1)
     assert_match(/target of a local forward/, conflict_r)
 
     # rm -l / rm -r removing non-existent forwards
@@ -120,15 +120,15 @@ class Susops < Formula
     assert_match(/PAC server:.*not running/, out_ps)
 
     # ls after adding forwards
-    shell_output("#{bin}/susops add -l 9002 8002")
-    shell_output("#{bin}/susops add -r 7002 6502")
+    shell_output("#{bin}/susops add -l 8002 9002")
+    shell_output("#{bin}/susops add -r 6502 7002")
     out_ls = shell_output("#{bin}/susops ls")
-    assert_match "→ me@example.com:9002 -> localhost:8002", out_ls
-    assert_match "→ localhost:7002 -> me@example.com:6502", out_ls
+    assert_match "- localhost:8002 → me@example.com:9002", out_ls
+    assert_match "- me@example.com:6502 → localhost:7002", out_ls
 
     # Check all, but in specific the ssh command
     out = shell_output("#{bin}/susops start host 6200 6201 -v")
-    assert_match(/-N -T -D 6200 -R 6500:localhost:7000 -R 6502:localhost:7002 -L 8000:localhost:9000 -L 7001:localhost:6501 -L 8002:localhost:9002 host/, out)
+    assert_match(/-N -T -D 6200 -L 8000:localhost:9000 -L 7001:localhost:6501 -L 8002:localhost:9002 -R 6500:localhost:7000 -R 6502:localhost:7002 host/, out)
     ssh = (testpath/"ws/ssh_host").read
     assert_match(/host/, ssh)
     assert_equal "6200\n", (testpath/"ws/socks_port").read
