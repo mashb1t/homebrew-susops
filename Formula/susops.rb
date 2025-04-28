@@ -5,6 +5,9 @@ class Susops < Formula
   url "https://github.com/mashb1t/susops-cli/archive/refs/tags/v1.0.2.tar.gz"
   sha256 "2cc68162d5f063c5e8a9b4be78ca0bec573ee43da187458ca82d9faf678e5127"
 
+  depends_on "autossh" => :recommended
+  uses_from_macos "curl"
+
   def install
     bin.install "susops.sh" => "susops"
     bin.install_symlink "susops" => "so"
