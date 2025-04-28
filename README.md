@@ -18,6 +18,7 @@ This is the Homebrew tap for SusOps, providing an easy way to install the SusOps
 
    ```bash
    brew install susops
+   brew link susops # only if the GUI is already installed
    ```
     or, for the GUI:
     
