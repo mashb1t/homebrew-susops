@@ -1,9 +1,9 @@
 class Susops < Formula
   desc "Lightweight CLI for website proxying and port forwarding"
   homepage "https://github.com/mashb1t/susops-cli"
-  url "https://github.com/mashb1t/susops-cli/archive/refs/tags/v1.0.5.tar.gz"
-  version "1.0.5"
-  sha256 "94d8599b6a7741eeff1a15da169e55a766c7dd07e0739c47bacf8fb034b03755"
+  url "https://github.com/mashb1t/susops-cli/archive/refs/tags/v2.0.0.tar.gz"
+  version "2.0.0"
+  sha256 "78f6452824d1ca81e6a9574753ec33c99b772d5dba1e29ac3ce2284064ee1d45"
 
   depends_on "autossh" => :recommended
   uses_from_macos "curl"
