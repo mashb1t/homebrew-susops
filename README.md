@@ -37,6 +37,11 @@ This is the Homebrew tap for SusOps, providing an easy way to install the SusOps
    brew upgrade --cask mashb1t/susops
    ```
 
+> [!NOTE]
+> homebrew tries to upgrade the SusOps cask in-place, which may fail sometimes. If you get an error like
+> `error: redefinition of module 'SwiftBridging'`, please manually delete the app and install it again with
+> `brew install --cask susops`. No data is lost in the process.
+
 ## License
 
 MIT © 2025 Manuel Schmid — see [LICENSE](LICENSE).
