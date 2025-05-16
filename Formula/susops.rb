@@ -75,6 +75,11 @@ class Susops < Formula
     out = shell_output("#{bin}/susops test example.com")
     assert_match(/✅ example.com via SOCKS/, out)
 
+    # restart
+    out = shell_output("#{bin}/susops restart")
+    assert_match(/SOCKS5 proxy \[tag\]:\s+🚀 started/, out)
+    assert_match(/PAC server:\s+🚀 started/, out)
+
     # stop
     out = shell_output("#{bin}/susops stop")
     assert_match(/SOCKS5 proxy \[tag\]:\s+🛑 stopped/, out)
