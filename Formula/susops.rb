@@ -21,7 +21,8 @@ class Susops < Formula
     ENV["SUSOPS_WORKSPACE"] = testpath/"ws"
 
     # ensure susops isn't running
-    shell_output("pkill -f susops || true")
+    shell_output("pkill -f susops-pac || true")
+    shell_output("pkill -f susops-ssh || true")
 
     # REPLACE THIS WITH YOUR SSH HOST
     host = "pi3"
@@ -67,7 +68,7 @@ class Susops < Formula
 
     # Starting without SSH host should fail
     output = shell_output("#{bin}/susops start")
-    assert_match(/SOCKS5 \[tag\]:\s+🚀 started/, output)
+    assert_match(/SOCKS5 proxy \[tag\]:\s+🚀 started/, output)
     assert_match(/PAC server:\s+🚀 started/, output)
 
     # test when is running
@@ -92,7 +93,7 @@ class Susops < Formula
     assert_match(/Local port 8000 is already the source of a local forward/, conflict)
 
     # add -r (remote-forward) and conflicting-port errors
-    assert_match "✅ Added remote forward [] pi3:6500 → localhost:7000", shell_output("#{bin}/susops add -r 6500 7000")
+    assert_match "✅ Added remote forward [6500] pi3:6500 → localhost:7000", shell_output("#{bin}/susops add -r 6500 7000")
     dup_r = shell_output("#{bin}/susops add -r 6500 7000", 1)
     assert_match(/already registered/, dup_r)
     shell_output("#{bin}/susops add -l 7001 6501")
@@ -147,6 +148,7 @@ class Susops < Formula
     shell_output("#{bin}/susops reset --force", 0)
 
     # Be double sure everything is cleaned up
-    shell_output("pkill -f susops || true")
+    shell_output("pkill -f susops-pac || true")
+    shell_output("pkill -f susops-ssh || true")
   end
 end
