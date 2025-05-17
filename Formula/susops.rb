@@ -119,7 +119,7 @@ class Susops < Formula
 
     # Check all, but in specific the ssh command
     out = shell_output("#{bin}/susops start #{host} 6200 6201 -v")
-    assert_match(/-N -T -D 6200 -L 8000:localhost:9000 -L 7001:localhost:6501 -R 6500:localhost:7000 #{host}/, out)
+    assert_match(/-N -T -D 6200 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 8000:localhost:9000 -L 7001:localhost:6501 -R 6500:localhost:7000 #{host}/, out)
     shell_output("#{bin}/susops stop")
 
     # ensure everything is cleaned up
