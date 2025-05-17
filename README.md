@@ -2,7 +2,7 @@
     <img src="icon.png" alt="Menu" height="200" />
 </p>
 
-# Homebrew SusOps Tap
+# Homebrew SusOps Tap - SSH Utilities & SOCKS5 Operations
 
 This is the Homebrew tap for SusOps, providing an easy way to install the SusOps CLI on macOS:
 
