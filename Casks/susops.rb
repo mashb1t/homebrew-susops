@@ -1,8 +1,8 @@
 cask "susops" do
-  version "2.2.2"
-  sha256 "6aadf972654578181de4971317d0b0462da71e2ef2f67b50917d4dd94a32f7d9"
+  version "2.3.0"
+  sha256 "6f2ed37d9511ad0ef5bc9b06534934691fee1ab9599f8de722218d87114a4ee5"
 
-  url "https://github.com/mashb1t/susops-mac/releases/download/v2.2.2/SusOps.zip"
+  url "https://github.com/mashb1t/susops-mac/releases/download/v2.3.0/SusOps.zip"
   name "SusOps"
   desc "Menu bar app for website proxying and port forwarding"
   homepage "https://github.com/mashb1t/susops-mac"
