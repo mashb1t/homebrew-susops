@@ -43,7 +43,7 @@ class Susops < Formula
     output = shell_output("#{bin}/susops add-connection tag", 1)
     assert_match "Error: SSH host is required", output
     output = shell_output("#{bin}/susops add-connection tag invalid-hostname-123", 1)
-    assert_match "Error: SSH connection to host 'invalid-hostname-123' failed", output
+    assert_match "Error: SSH proxy test to host 'invalid-hostname-123' failed", output
     output = shell_output("#{bin}/susops add-connection tag #{host}", 0)
     assert_match "Connection [tag]:", output
     assert_match "tested & added", output
@@ -91,23 +91,23 @@ class Susops < Formula
     assert_match "Usage: susops rm -r", shell_output("#{bin}/susops rm -r", 1)
 
     # add -l (local-forward) and duplicate-rule errors
-    assert_match "✅ Added local forward [8000] localhost:8000 → pi3:9000", shell_output("#{bin}/susops add -l 8000 9000")
+    assert_match "✅ Added local forward [8000] localhost:8000 → pi3:localhost:9000", shell_output("#{bin}/susops add -l 8000 9000")
     dup = shell_output("#{bin}/susops add -l 8000 9000", 1)
-    assert_match(/Local forward .*already registered/, dup)
+    assert_match(/Local forward .*already exists/, dup)
     conflict = shell_output("#{bin}/susops add -l 8000 9001", 1)
     assert_match(/Local port 8000 is already the source of a local forward/, conflict)
 
     # add -r (remote-forward) and conflicting-port errors
-    assert_match "✅ Added remote forward [6500] pi3:6500 → localhost:7000", shell_output("#{bin}/susops add -r 6500 7000")
+    assert_match "✅ Added remote forward [6500] pi3:localhost:6500 → localhost:7000", shell_output("#{bin}/susops add -r 6500 7000")
     dup_r = shell_output("#{bin}/susops add -r 6500 7000", 1)
-    assert_match(/already registered/, dup_r)
+    assert_match(/already exists/, dup_r)
     shell_output("#{bin}/susops add -l 7001 6501")
     conflict_r = shell_output("#{bin}/susops add -r 6501 7001", 1)
     assert_match(/Local port 7001 is already the source of a local forward/, conflict_r)
 
     # rm -l / rm -r removing non-existent forwards
     err_l = shell_output("#{bin}/susops rm -l 1111", 1)
-    assert_match "No local forward for localhost:1111", err_l
+    assert_match "No local forward for 1111", err_l
     err_r = shell_output("#{bin}/susops rm -r 2222", 1)
     assert_match(/No remote forward/, err_r)
 
@@ -119,7 +119,7 @@ class Susops < Formula
 
     # Check all, but in specific the ssh command
     out = shell_output("#{bin}/susops start #{host} 6200 6201 -v")
-    assert_match(/-N -T -D 6200 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L 8000:localhost:9000 -L 7001:localhost:6501 -R 6500:localhost:7000 #{host}/, out)
+    assert_match(/-N -T -D 6200 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -L localhost:8000:localhost:9000 -L localhost:7001:localhost:6501 -R localhost:6500:localhost:7000 #{host}/, out)
     shell_output("#{bin}/susops stop")
 
     # ensure everything is cleaned up
