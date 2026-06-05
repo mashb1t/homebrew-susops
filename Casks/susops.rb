@@ -1,11 +1,26 @@
 cask "susops" do
-  version "2.4.0"
-  sha256 "1fb670fc198e5ddad236388482b7632d28b51035111c3a6efbc6d05e0f91d055"
+  # version + sha256 rewritten by scripts/update_homebrew_sha.py on each tag.
+  version "3.0.0-rc3.dev6"
+  sha256 "42047e0a11c93aac49acc3dfe72c53b6154986a7b3bf5b052a667f2ef42aef0c"
 
-  url "https://github.com/mashb1t/susops-mac/releases/download/v2.4.0/SusOps.zip"
+  url "https://github.com/mashb1t/susops/releases/download/v#{version}/SusOps-#{version}-arm64.dmg"
   name "SusOps"
-  desc "Menu bar app for website proxying and port forwarding"
-  homepage "https://github.com/mashb1t/susops-mac"
+  desc "SSH SOCKS5 proxy manager — macOS tray app"
+  homepage "https://github.com/mashb1t/susops"
+
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  depends_on macos: ">= :big_sur"
+  depends_on arch: :arm64
 
   app "SusOps.app"
+
+  zap trash: [
+    "~/.susops",
+    "~/Library/Application Support/SusOps",
+    "~/Library/Logs/SusOps",
+  ]
 end
